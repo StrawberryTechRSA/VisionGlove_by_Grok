@@ -1,0 +1,33 @@
+# Build
+build/
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.lib
+*.dll
+
+# Logs / runtime
+logs/
+*.log
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# CMake
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+compile_commands.json
+
+# Secrets (never commit live credentials)
+.env
+*.pem
+secrets.json

@@ -1,0 +1,58 @@
+{
+    "system": {
+        "name": "VisionGlove",
+        "version": "2.0.0-grok",
+        "debug_mode": false,
+        "log_level": "INFO"
+    },
+    "sensors": {
+        "enabled": true,
+        "sample_rate": 100,
+        "calibration_required": true,
+        "timeout": 5.0,
+        "unusual_accel_threshold": 15.0,
+        "closed_threshold": 0.70,
+        "open_threshold": 0.30,
+        "panic_window_s": 2.0,
+        "panic_fist_count": 3
+    },
+    "vision": {
+        "enabled": true,
+        "camera_index": 0,
+        "resolution": [640, 480],
+        "fps": 30,
+        "detection_threshold": 0.7,
+        "person_threshold": 3,
+        "simulate": true
+    },
+    "haptics": {
+        "enabled": true,
+        "intensity": 0.8,
+        "duration": 1.0,
+        "pattern": "pulse"
+    },
+    "communications": {
+        "emergency_contact": "+10000000000",
+        "police_number": "",
+        "dry_run": true,
+        "sms_service": {
+            "provider": "twilio",
+            "account_sid": "",
+            "auth_token": "",
+            "from_number": ""
+        }
+    },
+    "security": {
+        "encryption_enabled": true,
+        "key_rotation_interval": 3600,
+        "max_failed_attempts": 3
+    },
+    "livestream": {
+        "enabled": true,
+        "quality": "medium",
+        "platform": "youtube",
+        "stream_key": "",
+        "max_duration": 3600,
+        "dry_run": true
+    }
+}
