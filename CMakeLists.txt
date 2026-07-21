@@ -9,6 +9,7 @@ add_executable(visionglove
     src/logger.cpp
     src/config.cpp
     src/security.cpp
+    src/serial_stub.cpp
     src/sensors.cpp
     src/vision.cpp
     src/haptics.cpp

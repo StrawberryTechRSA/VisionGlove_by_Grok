@@ -2,9 +2,11 @@
 
 #include "visionglove/config.hpp"
 #include "visionglove/ring_buffer.hpp"
+#include "visionglove/serial_stub.hpp"
 #include "visionglove/types.hpp"
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <thread>
 
@@ -129,8 +131,13 @@ public:
 
     // Test / demo control
     void set_simulation(bool on);
-    void force_gesture_scenario(const std::string& name);  // "idle","fist","panic","shake"
+    void force_gesture_scenario(const std::string& name);  // "idle","fist","panic","shake","serial"
     bool calibrate(int samples = 50);
+
+    // Hardware bridge stub: text file or future COM port using same line protocol
+    bool attach_serial_feed(const std::string& path, bool loop = true);
+    void detach_serial_feed();
+    [[nodiscard]] SerialStub* serial_stub() { return serial_.get(); }
 
     [[nodiscard]] double measured_hz() const { return measured_hz_.load(std::memory_order_relaxed); }
 
@@ -153,6 +160,9 @@ private:
 
     std::mutex scenario_mu_;
     std::string scenario_ = "idle";
+
+    std::unique_ptr<SerialStub> serial_;
+    int serial_pump_div_ = 0;  // pump file every N collect cycles
 };
 
 }  // namespace vg

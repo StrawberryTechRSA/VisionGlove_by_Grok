@@ -37,6 +37,7 @@ public:
     // Demo / test hooks
     void set_scenario(const std::string& name);
     void set_person_count(int n);
+    bool attach_serial_feed(const std::string& path, bool loop = true);
     bool run_self_test(std::vector<std::pair<std::string, bool>>& results);
 
     SensorManager* sensors() { return sensors_.get(); }

@@ -1,7 +1,9 @@
 #include "visionglove/glove_system.hpp"
 #include "visionglove/logger.hpp"
+#include "visionglove/serial_stub.hpp"
 
 #include <chrono>
+#include <cmath>
 
 namespace vg {
 
@@ -159,6 +161,11 @@ void GloveSystem::set_person_count(int n) {
     if (vision_) vision_->set_simulated_person_count(n);
 }
 
+bool GloveSystem::attach_serial_feed(const std::string& path, bool loop) {
+    if (!sensors_) return false;
+    return sensors_->attach_serial_feed(path, loop);
+}
+
 bool GloveSystem::run_self_test(std::vector<std::pair<std::string, bool>>& results) {
     results.clear();
     std::string err;
@@ -205,6 +212,19 @@ bool GloveSystem::run_self_test(std::vector<std::pair<std::string, bool>>& resul
         std::array<double, 5> rock{{0.85, 0.1, 0.9, 0.9, 0.1}};
         for (int i = 0; i < 5; ++i) g = ge.update(rock, 0.0, all);
         results.emplace_back("gesture_rock", g == Gesture::Rock);
+    }
+
+    // Serial stub parse (no file required)
+    {
+        SerialPacket pkt;
+        const bool ok_flex = parse_sensor_line("FLEX,0.85,0.1,0.9,0.9,0.1", pkt);
+        results.emplace_back("serial_parse_flex", ok_flex && pkt.has_flex &&
+            pkt.flex[1] < 0.2 && pkt.flex[4] < 0.2);
+        SerialPacket imu;
+        const bool ok_imu = parse_sensor_line("IMU,1,2,9.81,0.1,0.2,0.3", imu);
+        results.emplace_back("serial_parse_imu", ok_imu && imu.has_imu &&
+            std::abs(imu.accel.z - 9.81) < 1e-6);
+        results.emplace_back("serial_parse_comment", !parse_sensor_line("# ignore me", pkt));
     }
 
     // Threat analyzer

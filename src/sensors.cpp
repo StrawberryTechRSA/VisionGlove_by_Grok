@@ -282,6 +282,27 @@ void SensorManager::force_gesture_scenario(const std::string& name) {
     scenario_ = name;
 }
 
+bool SensorManager::attach_serial_feed(const std::string& path, bool loop) {
+    auto stub = std::make_unique<SerialStub>();
+    if (!stub->open_file(path, loop)) return false;
+    serial_ = std::move(stub);
+    {
+        std::lock_guard lock(scenario_mu_);
+        scenario_ = "serial";
+    }
+    VG_LOG_INFO("Sensors", "Serial feed attached — scenario=serial");
+    return true;
+}
+
+void SensorManager::detach_serial_feed() {
+    if (serial_) {
+        serial_->close();
+        serial_.reset();
+    }
+    std::lock_guard lock(scenario_mu_);
+    if (scenario_ == "serial") scenario_ = "idle";
+}
+
 bool SensorManager::start() {
     if (active_.load()) return true;
     stop_ = false;
@@ -363,6 +384,24 @@ SensorSnapshot SensorManager::collect_once(double dt) {
         flex_[2].inject_raw(0.9);
         flex_[3].inject_raw(0.9);
         flex_[4].inject_raw(0.1);
+    } else if (scenario == "serial") {
+        // Hardware bridge stub: pump text feed → inject into same flex/IMU path
+        if (serial_) {
+            // ~10 Hz line rate if sensor thread is ~100 Hz
+            if (++serial_pump_div_ >= 10) {
+                serial_pump_div_ = 0;
+                (void)serial_->pump_next();
+            }
+            if (serial_->has_data()) {
+                const auto pkt = serial_->latest();
+                if (pkt.has_flex) {
+                    for (int i = 0; i < 5; ++i) flex_[i].inject_raw(pkt.flex[static_cast<std::size_t>(i)]);
+                }
+                if (pkt.has_imu) {
+                    imu_.inject(pkt.accel, pkt.gyro, {0.2, 0.1, 0.3});
+                }
+            }
+        }
     } else if (scenario == "shake") {
         for (int i = 0; i < 5; ++i) flex_[i].inject_raw(0.5);
         imu_.inject({20.0, 5.0, 9.81}, {2.0, 1.5, 0.5}, {0.2, 0.1, 0.3});

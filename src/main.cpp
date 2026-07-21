@@ -22,7 +22,8 @@ void print_usage(const char* argv0) {
         << "  --config, -c <path>   Configuration JSON\n"
         << "  --debug, -d           Debug logging\n"
         << "  --test, -t            Run self-tests and exit\n"
-        << "  --demo <name>         Scenario: idle|fist|open|point|rock|shake|panic\n"
+        << "  --demo <name>         Scenario: idle|fist|open|point|rock|shake|panic|serial\n"
+        << "  --serial-file <path>  Text sensor feed (FLEX/IMU lines); enables serial scenario\n"
         << "  --persons <n>         Simulated person count\n"
         << "  --seconds <n>         Run for n seconds then exit (0=forever)\n"
         << "  --version, -v         Version\n"
@@ -35,6 +36,7 @@ int main(int argc, char** argv) {
     bool debug = false;
     bool test_only = false;
     std::string demo = "idle";
+    std::string serial_file;
     int persons = 1;
     int seconds = 0;
 
@@ -44,6 +46,7 @@ int main(int argc, char** argv) {
         else if (a == "--debug" || a == "-d") debug = true;
         else if (a == "--test" || a == "-t") test_only = true;
         else if (a == "--demo" && i + 1 < argc) demo = argv[++i];
+        else if (a == "--serial-file" && i + 1 < argc) serial_file = argv[++i];
         else if (a == "--persons" && i + 1 < argc) persons = std::stoi(argv[++i]);
         else if (a == "--seconds" && i + 1 < argc) seconds = std::stoi(argv[++i]);
         else if (a == "--version" || a == "-v") {
@@ -88,9 +91,26 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    system.set_scenario(demo);
+    if (!serial_file.empty()) {
+        if (!system.attach_serial_feed(serial_file, true)) {
+            VG_LOG_ERROR("Main", "Failed to open --serial-file: " + serial_file);
+            system.stop();
+            return 1;
+        }
+        demo = "serial";
+    } else if (demo == "serial") {
+        // Default beginner feed
+        if (!system.attach_serial_feed("config/sample_serial_feed.txt", true)) {
+            VG_LOG_ERROR("Main", "Default serial feed missing: config/sample_serial_feed.txt");
+            system.stop();
+            return 1;
+        }
+    } else {
+        system.set_scenario(demo);
+    }
     system.set_person_count(persons);
-    VG_LOG_INFO("Main", "Running demo='" + demo + "' persons=" + std::to_string(persons));
+    VG_LOG_INFO("Main", "Running demo='" + demo + "' persons=" + std::to_string(persons) +
+                (serial_file.empty() ? "" : " serial=" + serial_file));
     VG_LOG_INFO("Main", "Press Ctrl+C to stop");
 
     using namespace std::chrono;
