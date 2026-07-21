@@ -198,6 +198,12 @@ Gesture GestureEngine::classify(const std::array<double, 5>& flex) const {
     if (flex[1] < oth && flex[2] < oth && flex[0] > cth * 0.7 && flex[3] > cth && flex[4] > cth)
         return Gesture::Peace;
 
+    // Rock / horns: index + pinky open; thumb, middle, ring closed
+    // flex[] = thumb, index, middle, ring, pinky (0=extended, 1=bent)
+    if (flex[1] < oth && flex[4] < oth &&
+        flex[0] > cth * 0.7 && flex[2] > cth && flex[3] > cth)
+        return Gesture::Rock;
+
     return Gesture::None;
 }
 
@@ -350,6 +356,13 @@ SensorSnapshot SensorManager::collect_once(double dt) {
         flex_[2].inject_raw(0.9);
         flex_[3].inject_raw(0.9);
         flex_[4].inject_raw(0.9);
+    } else if (scenario == "rock") {
+        // index + pinky extended; thumb/middle/ring bent
+        flex_[0].inject_raw(0.85);
+        flex_[1].inject_raw(0.1);
+        flex_[2].inject_raw(0.9);
+        flex_[3].inject_raw(0.9);
+        flex_[4].inject_raw(0.1);
     } else if (scenario == "shake") {
         for (int i = 0; i < 5; ++i) flex_[i].inject_raw(0.5);
         imu_.inject({20.0, 5.0, 9.81}, {2.0, 1.5, 0.5}, {0.2, 0.1, 0.3});

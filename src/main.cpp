@@ -22,7 +22,7 @@ void print_usage(const char* argv0) {
         << "  --config, -c <path>   Configuration JSON\n"
         << "  --debug, -d           Debug logging\n"
         << "  --test, -t            Run self-tests and exit\n"
-        << "  --demo <name>         Scenario: idle|fist|open|point|shake|panic\n"
+        << "  --demo <name>         Scenario: idle|fist|open|point|rock|shake|panic\n"
         << "  --persons <n>         Simulated person count\n"
         << "  --seconds <n>         Run for n seconds then exit (0=forever)\n"
         << "  --version, -v         Version\n"

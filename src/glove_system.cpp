@@ -200,6 +200,11 @@ bool GloveSystem::run_self_test(std::vector<std::pair<std::string, bool>>& resul
         std::array<double, 5> open{{0.1, 0.1, 0.1, 0.1, 0.1}};
         for (int i = 0; i < 5; ++i) g = ge.update(open, 0.0, all);
         results.emplace_back("gesture_open", g == Gesture::OpenHand);
+
+        // Rock: thumb bent, index open, middle bent, ring bent, pinky open
+        std::array<double, 5> rock{{0.85, 0.1, 0.9, 0.9, 0.1}};
+        for (int i = 0; i < 5; ++i) g = ge.update(rock, 0.0, all);
+        results.emplace_back("gesture_rock", g == Gesture::Rock);
     }
 
     // Threat analyzer

@@ -133,7 +133,8 @@ enum class Gesture : std::uint8_t {
     Pointing,
     Peace,
     ThumbsUp,
-    PanicSequence  // triple-fist within window — emergency
+    Rock,            // index + pinky open ("horns") — beginner exercise #2
+    PanicSequence    // triple-fist within window — emergency
 };
 
 [[nodiscard]] inline std::string_view to_string(Gesture g) {
@@ -144,6 +145,7 @@ enum class Gesture : std::uint8_t {
         case Gesture::Pointing: return "pointing";
         case Gesture::Peace: return "peace_sign";
         case Gesture::ThumbsUp: return "thumbs_up";
+        case Gesture::Rock: return "rock";
         case Gesture::PanicSequence: return "panic_sequence";
     }
     return "unknown";
